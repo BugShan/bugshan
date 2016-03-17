@@ -61,12 +61,31 @@ namespace BugShan
 			 */
 			const uint64 GetSize(void) const;
 
-		private:
+		public:
 			/**
-			 * Get the state of this file.
-			 * If not exits, create one.
+			 * Create a specified file.
+			 * @param path: the path of the file to create
 			 */
-			inline stat*	GetFileStat(void);
+			static void Create(const char* const path);
+			/**
+			 * Delete a specified file.
+			 * @param path: the path of the file to delete.
+			 */
+			static void Delete(const char* const path);
+			/**
+			 * Copy the file to another path.
+			 * @param from: the src path of the file copied from
+			 * @param to:   the dest path of the file copied to
+			 */
+			static void Copy(const char* const from, const char* const to);
+			/**
+			 * Move the file to another path.
+			 * @param from: the src path of the file copied from
+			 * @param to:   the dest path of the file copied to
+			 */
+			static void Move(const char* const from, const char* const to);
+
+		private:
 			/**
 			 * The assignment operator overload.
 			 * @param other: the other file

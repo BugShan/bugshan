@@ -1,26 +1,78 @@
 #include <bugshan/io/File.h>
 #include <bugshan/io/Directory.h>
+#include <bugshan/io/FileStream.h>
 
 #include <iostream>
 
 using namespace BugShan::IO;
 
-int main(void)
-{
-	const char* const dirPath = ".";
-	Directory* pdir = new Directory(dirPath);
-	const std::vector<File*> filePtrVec = pdir->GetFiles();
-	const std::vector<Directory*> dirPtrVec = pdir->GetDirectories();
+const char* const G_COMMAND_SHOW_DIRECTORY		= "show_directory";
+const char* const G_COMMAND_CREATE_FILE			= "create_file";
+const char* const G_COMMAND_DELETE_FILE			= "delete_file";
+const char* const G_COMMAND_MOVE_FILE			= "move_file";
+const char* const G_COMMAND_COPY_FILE			= "copy_file";
+const char* const G_COMMAND_WRITE_FILE			= "write_file";
 
-	std::cout << "List the files of this directory: "  << dirPath << std::endl;
+
+void show_directory(const char* const dirPath)
+{
+	Directory dir(dirPath);
+	const std::vector<File*> filePtrVec = dir.GetFiles();
+	const std::vector<Directory*> subDirPtrVec = dir.GetDirectories();
+	std::cout << "List the files of this directory: " << dirPath << std::endl;
 	for(auto fp : filePtrVec)
-	{
 		std::cout << fp->GetFullPath() << std::endl;
-	}
-	std::cout << "List the directories of this directory: "  << dirPath << std::endl;
-	for(auto dp : dirPtrVec)
-	{
+	std::cout << "List the directories of this directory: " << dirPath << std::endl;
+	for(auto dp : subDirPtrVec)
 		std::cout << dp->GetFullPath() << std::endl;
+
+	for(auto fp : filePtrVec)
+		delete fp;
+	for(auto dp : subDirPtrVec)
+		delete dp;
+}
+
+const char* const g_dir_path = ".";
+int main(int argc, char** argv)
+{
+	if(0 == strcmp(argv[1], G_COMMAND_SHOW_DIRECTORY))
+	{
+		if(argc >= 3)
+			show_directory(argv[2]);
+	}
+	else if(0 == strcmp(argv[1], G_COMMAND_CREATE_FILE))
+	{
+		if(argc >= 3)
+			File::Create(argv[2]);
+	}
+	else if(0 == strcmp(argv[1], G_COMMAND_DELETE_FILE))
+	{
+		if(argc >= 3)
+			File::Delete(argv[2]);
+	}
+	else if(0 == strcmp(argv[1], G_COMMAND_MOVE_FILE))
+	{
+		if(argc >= 4)
+			File::Move(argv[2], argv[3]);
+	}
+	else if(0 == strcmp(argv[1], G_COMMAND_COPY_FILE))
+	{
+		if(argc >= 4)
+			File::Copy(argv[2], argv[3]);
+	}
+	else if(0 == strcmp(argv[1], G_COMMAND_WRITE_FILE))
+	{
+		if(argc >= 3)
+		{
+			File* file = new File(argv[2]);
+			FileStream* writer = file->GetStream();
+			char buff[] = "1 2 3 4 5 6 7 8 9 q w e r t y u i o p";
+			writer->Write(buff, sizeof(buff) - 1);
+			writer->Write(buff, sizeof(buff) - 1);
+			writer->Close();
+			delete writer;
+			delete file;
+		}
 	}
 	return 0;
 }

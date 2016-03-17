@@ -22,6 +22,7 @@ namespace BugShan
 			~FileStream(void);
 
 		public:
+			const bool IsEOF(void) const;
 			/**
 			 * Read file to buffer.
 			 * @param dest: the buffer to read
@@ -43,7 +44,6 @@ namespace BugShan
 
 		private:
 			FILE*							mpFile;
-			uint64							muOffset;
 		};//class FileStream
 	};//namespace IO
 };//namespace BugShan
