@@ -75,7 +75,6 @@ namespace BugShan
 	private:
 		T*			mpData;
 		RefTy*		mpRefCount;
-
 	};//class RefPtr
 
 	template<typename T, typename RefTy>
