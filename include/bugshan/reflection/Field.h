@@ -2,6 +2,9 @@
 #define	_BUGSHAN_REFLECTION_FIELD_H_
 
 #include <bugshan/TypeDef.h>
+#include <bugshan/reflection/TypeDecl.h>
+#include <type_traits>
+#include <string>
 
 namespace BugShan
 {
@@ -10,29 +13,53 @@ namespace BugShan
 		namespace detail
 		{
 			template<typename T>
-			struct is_field : public std::false_type { ; };//struct is_field<T>
+			struct field_trait;//struct field_trait
 			template<typename Class, typename T>
-			struct is_field<T(Class::*)> : public std::true_type { ; };//struct is_field<T(Class::*)>
+			struct field_trait<T(Class::*)>
+			{
+				using field_type = T;
+				using class_type = Class;
+			};//struct field_Trait<T(Class::*)>
 		};//namespace detail
 
 		class Type;
 		class Field final
 		{
 		public:
-			//template<typename T, typename = typename std::enable_if<!detail::is_field<T>::value>::type>
-			//inline Field(const char* const fieldName, T fieldAddress);
-
-			//template<typename Class, typename T, typename = typename std::enable_if<detail::is_field<T(Class::*)>::value>::type>
-			//inline Field<T(Class::*)>(const char* const fieldName, T(Class::*) address);
-
+			/**
+			 * The constructor.
+			 * @param fieldName:	the name of this field
+			 * @param fieldAddress:	the pointer to this field
+			 */
+			template<typename T, typename ClassType = typename detail::field_trait<T>::class_type, typename FieldType = typename detail::field_trait<T>::field_type>
+			inline Field(const char* const fieldName, const T fieldAddress);
+			/**
+			 * The destructor.
+			 */
 			inline ~Field(void);
 
 		public:
+			/**
+			 * Get the name of this field.
+			 */
 			inline const char* const GetNamePtr(void) const;
 
 		public:
+			/**
+			 * Get the type of this field
+			 */
 			const Type* GetTypePtr(void) const;
+			/**
+			 * Set the value to this field of one object[ClassType].
+			 * @param object: pass the object
+			 * @param value:  pass the value of this field.
+			 */
 			void SetValue(const void* const object, const void* const value);
+			/**
+			 * Get the value from this field of one object[ClassType].
+			 * @param ret:	  where the value write to
+			 * @param object: pass the object
+			 */
 			void GetValue(void* ret, const void* const object);
 
 		private:
@@ -41,12 +68,15 @@ namespace BugShan
 			const uint							muOffset;
 			const uint							muSize;
 		};//class Field
+		
+		template<typename T, typename ClassType, typename FieldType>
+		inline Field::Field(const char* const fieldName, const T fieldAddress)
+			: mpFieldName(fieldName)
+			, mpTypeName(TypeDecl<FieldType>::GetName())
+			, muOffset((size_t)(&((ClassType*)0->*fieldAddress)))
+			, muSize(sizeof(FieldType))
+		{ ; }
 
-		//template<typename T>
-		//inline Field::Field(const char* const, T)
-		//{
-		//	//static_assert(false, "");
-		//}
 		inline Field::~Field(void)
 		{ ; }
 

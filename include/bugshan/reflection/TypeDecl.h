@@ -13,6 +13,13 @@ namespace BugShan
 	namespace Reflection
 	{
 		template<typename T>
+		struct TypeDecl final
+		{
+			const char* const			name = nullptr;
+		};//struct TypeDecl
+
+		/*
+		template<typename T>
 		class TypeDecl final
 		{
 		public:
@@ -63,14 +70,25 @@ namespace BugShan
 			mpType->AddMethod(field);
 			return *this;
 		}
+		*/
 	};//namespace Reflection
 };//namespace BugShan
 
 #define TYPE_DECL(type)							\
+	template<>									\
+	struct TypeDecl<type>						\
+	{											\
+		inline const char* const GetName(void)	\
+		{										\
+			return ##type;						\
+		}										\
+	};//struct TypeDecl<type>
+
+/*
+#define TYPE_DECL(type)							\
 	Detail::AutoRunHelper type##auto_decl;		\
 	Detail::AutoRunHelper::AutoRunHelper(void)
 
-/*
 #define TYPE_DECL_ARGS(_1, _2, _3, _4, _5, N) N
 #define TYPE_DECL_1(type)
 #define TYPE_DECL_2(type, name)
