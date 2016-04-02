@@ -30,10 +30,9 @@ namespace BugShan
 				delete mpFileStat;
 		}
 
-		FileStream* File::GetStream(void) const
+		FileStream File::GetStream(void) const
 		{
-			FileStream* ret = new FileStream(mFullPathStr.c_str());
-			return ret;
+			return FileStream(mFullPathStr.c_str());
 		}
 
 		Directory* File::GetDirectoryPtr(void) const
@@ -59,23 +58,17 @@ namespace BugShan
 		}
 		void File::Copy(const char* const from, const char* const to)
 		{
-			File* fromFile = new File(from);
-			File* toFile = new File(to);
-			FileStream* reader = fromFile->GetStream();
-			FileStream* writer = toFile->GetStream();
+			FileStream reader(from);
+			FileStream writer(to);
 			const unsigned int size = 1024;
 			unsigned char buffer[size];
-			while(!reader->IsEOF())
+			while(!reader.IsEOF())
 			{
-				int bytes = reader->Read(buffer, size);
-				writer->Write(buffer, bytes);
+				int bytes = reader.Read(buffer, size);
+				writer.Write(buffer, bytes);
 			}
-			reader->Close();
-			writer->Close();
-			delete reader;
-			delete writer;
-			delete fromFile;
-			delete toFile;
+			reader.Close();
+			writer.Close();
 		}
 
 		void File::Move(const char* const from, const char* const to)
