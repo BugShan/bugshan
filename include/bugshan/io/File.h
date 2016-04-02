@@ -51,7 +51,7 @@ namespace BugShan
 			/**
 			 * Get the file stream.
 			 */
-			FileStream* GetStream(void) const;
+			FileStream GetStream(void) const;
 			/**
 			 * Get the directory information of this file.
 			 */

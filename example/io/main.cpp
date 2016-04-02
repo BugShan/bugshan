@@ -65,12 +65,11 @@ int main(int argc, char** argv)
 		if(argc >= 3)
 		{
 			File* file = new File(argv[2]);
-			FileStream* writer = file->GetStream();
+			FileStream writer = file->GetStream();
 			char buff[] = "1 2 3 4 5 6 7 8 9 q w e r t y u i o p";
-			writer->Write(buff, sizeof(buff) - 1);
-			writer->Write(buff, sizeof(buff) - 1);
-			writer->Close();
-			delete writer;
+			writer.Write(buff, sizeof(buff) - 1);
+			writer.Write(buff, sizeof(buff) - 1);
+			writer.Close();
 			delete file;
 		}
 	}
