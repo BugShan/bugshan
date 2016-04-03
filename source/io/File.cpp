@@ -13,38 +13,33 @@ namespace BugShan
 		File::File(const char* const path)
 			: mFullPathStr(path)
 			, mFileNameStr(Path::GetFileNameStr(mFullPathStr))
-			, mpFileStat(new struct stat)
 		{
-			stat(mFullPathStr.c_str(), mpFileStat);
 		}
 		File::File(const File& other)
 			: mFullPathStr(other.mFullPathStr)
 			, mFileNameStr(other.mFileNameStr)
-			, mpFileStat(new struct stat)
 		{
-			stat(mFullPathStr.c_str(), mpFileStat);
 		}
 		File::~File(void)
-		{
-			if(mpFileStat)
-				delete mpFileStat;
-		}
+		{ ; }
 
 		FileStream File::GetStream(void) const
 		{
 			return FileStream(mFullPathStr.c_str());
 		}
 
-		Directory* File::GetDirectoryPtr(void) const
+		Directory File::GetDirectory(void) const
 		{
 			std::string dirPath = Path::GetDirPathStr(mFullPathStr);
 			assert(!dirPath.empty());
-			return new Directory(dirPath.c_str());
+			return Directory(dirPath.c_str());
 		}
 
 		const uint64 File::GetSize(void) const
 		{
-			return mpFileStat->st_size;
+			struct stat fileStat;
+			stat(mFullPathStr.c_str(), &fileStat);
+			return fileStat.st_size;
 		}
 
 		void File::Create(const char* const path)

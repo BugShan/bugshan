@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-struct stat;
 namespace BugShan
 {
 	namespace IO
@@ -55,7 +54,7 @@ namespace BugShan
 			/**
 			 * Get the directory information of this file.
 			 */
-			Directory*	GetDirectoryPtr(void) const;
+			Directory GetDirectory(void) const;
 			/**
 			 * Get the size of this file.
 			 */
@@ -95,7 +94,6 @@ namespace BugShan
 		private:
 			const std::string			mFullPathStr;
 			const std::string			mFileNameStr;
-			stat*						mpFileStat;
 		};//class File
 
 		inline const bool File::operator ==(const File& other) const

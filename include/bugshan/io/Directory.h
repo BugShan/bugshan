@@ -48,15 +48,15 @@ namespace BugShan
 			/**
 			 * List the files from this directory.
 			 */
-			const std::vector<File*> GetFiles(void) const;
+			const std::vector<File> GetFiles(void) const;
 			/**
 			 * List the directories from this directory.
 			 */
-			const std::vector<Directory*> GetDirectories(void) const;
+			const std::vector<Directory> GetDirectories(void) const;
 			/**
 			 * Get the parent directory of this directory.
 			 */
-			Directory* GetParentDirectoryPtr(void) const;
+			Directory GetParentDirectory(void) const;
 
 		private:
 			/**
