@@ -12,24 +12,20 @@ const char* const G_COMMAND_DELETE_FILE			= "delete_file";
 const char* const G_COMMAND_MOVE_FILE			= "move_file";
 const char* const G_COMMAND_COPY_FILE			= "copy_file";
 const char* const G_COMMAND_WRITE_FILE			= "write_file";
+const char* const G_COMMAND_FILE_SIZE			= "file_size";
 
 
 void show_directory(const char* const dirPath)
 {
 	Directory dir(dirPath);
-	const std::vector<File*> filePtrVec = dir.GetFiles();
-	const std::vector<Directory*> subDirPtrVec = dir.GetDirectories();
+	const std::vector<File> fileVec = dir.GetFiles();
+	const std::vector<Directory> subDirVec = dir.GetDirectories();
 	std::cout << "List the files of this directory: " << dirPath << std::endl;
-	for(auto fp : filePtrVec)
-		std::cout << fp->GetFullPath() << std::endl;
+	for(auto& file : fileVec)
+		std::cout << file.GetFullPath() << std::endl;
 	std::cout << "List the directories of this directory: " << dirPath << std::endl;
-	for(auto dp : subDirPtrVec)
-		std::cout << dp->GetFullPath() << std::endl;
-
-	for(auto fp : filePtrVec)
-		delete fp;
-	for(auto dp : subDirPtrVec)
-		delete dp;
+	for(auto& dir : subDirVec)
+		std::cout << dir.GetFullPath() << std::endl;
 }
 
 const char* const g_dir_path = ".";
@@ -59,6 +55,15 @@ int main(int argc, char** argv)
 	{
 		if(argc >= 4)
 			File::Copy(argv[2], argv[3]);
+	}
+	else if(0 == strcmp(argv[1], G_COMMAND_FILE_SIZE))
+	{
+		if(argc >= 3)
+		{
+			File file(argv[1]);
+			auto size = file.GetSize();
+			std::cout << size << std::endl;
+		}
 	}
 	else if(0 == strcmp(argv[1], G_COMMAND_WRITE_FILE))
 	{
