@@ -129,6 +129,14 @@ namespace BugShan
 	}
 
 	template<typename T, typename RefTy>
+	inline void RefPtr<T, RefTy>::Release(void)
+	{
+		delete mpData;
+		mpData = 0;
+		mpRefCount = 0;
+	}
+
+	template<typename T, typename RefTy>
 	inline RefPtr<T, RefTy>::operator const bool(void) const
 	{
 		return mpData > 0;
