@@ -5,6 +5,7 @@
 #include <bugshan/utility/DisableOnHeap.h>
 
 #include <stdlib.h>
+#include <type_traits>
 
 namespace BugShan
 {
@@ -47,6 +48,11 @@ namespace BugShan
 		 */
 		inline void Release(void);
 
+		template<typename _Ty, typename _RefTy>
+		friend class RefPtr;
+		template<typename CastTy, typename = typename std::enable_if<std::is_base_of<T, CastTy>::value || std::is_base_of<CastTy, T>::value>::type>
+		inline RefPtr<CastTy> CastPtr(void);
+
 	public:
 		/**
 		 * Check if nullptr.
@@ -72,6 +78,7 @@ namespace BugShan
 	private:
 		inline void IncreaseRefCount(void);
 		inline void DecreaseRefCount(void);
+		inline void FreeData(void);
 	private:
 		T*			mpData;
 		RefTy*		mpRefCount;
@@ -94,7 +101,7 @@ namespace BugShan
 	{
 		if(nullptr == mpData) return;
 		DecreaseRefCount();
-		if(*mpRefCount <= 0) delete mpData;
+		if(*mpRefCount <= 0) this->FreeData();
 	}
 	template<typename T, typename RefTy>
 	inline RefPtr<T, RefTy>& RefPtr<T, RefTy>::operator = (const RefPtr& other)
@@ -102,7 +109,7 @@ namespace BugShan
 		if(mpData)
 		{
 			DecreaseRefCount();
-			if(*mpRefCount <= 0) delete mpData;
+			if(*mpRefCount <= 0) this->FreeData();
 		}
 		mpData		= other.mpData;
 		mpRefCount	= other.mpRefCount;
@@ -131,9 +138,17 @@ namespace BugShan
 	template<typename T, typename RefTy>
 	inline void RefPtr<T, RefTy>::Release(void)
 	{
-		delete mpData;
-		mpData = 0;
+		this->FreeData();
 		mpRefCount = 0;
+	}
+	template<typename T, typename RefTy>
+	template<typename CastTy, typename /*= typename std::enable_if<std::is_base_of<T, CastTy>::value || std::is_base_of<CastTy, T>::value>::type*/>
+	inline RefPtr<CastTy> RefPtr<T, RefTy>::CastPtr(void)
+	{
+		RefPtr<CastTy> ret;
+		ret.mpData		= static_cast<CastTy*>(this->mpData);
+		ret.mpRefCount	= this->mpRefCount;
+		IncreaseRefCount();
 	}
 
 	template<typename T, typename RefTy>
@@ -171,6 +186,13 @@ namespace BugShan
 	inline void RefPtr<T, RefTy>::DecreaseRefCount(void)
 	{
 		(*mpRefCount) --;
+	}
+	template<typename T, typename RefTy>
+	inline void RefPtr<T, RefTy>::FreeData(void)
+	{
+		mpData->~T();
+		free(mpData);
+		mpData = nullptr;
 	}
 };//namespace BugShan
 
