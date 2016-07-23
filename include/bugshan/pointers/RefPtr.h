@@ -5,6 +5,7 @@
 #include <bugshan/utility/DisableOnHeap.h>
 
 #include <stdlib.h>
+#include <memory.h>
 #include <type_traits>
 
 namespace BugShan
@@ -14,13 +15,19 @@ namespace BugShan
 	{
 	public:
 		/**
-		 * The paramterless constructor.
+		 * Point to null.
 		 */
-		inline RefPtr(void);
+		static RefPtr NullPtr(void);
+	public:
+		/**
+		 * Pass the multi template arguments to the constructor of type(T) directly.
+		 */
+		template<typename... Args>
+		inline RefPtr(Args...);
 		/**
 		 * The copy constructor.
 		 */
-		inline RefPtr(const RefPtr&);
+		inline RefPtr(const RefPtr& other);
 		/**
 		 * The destructor.
 		 */
@@ -28,15 +35,14 @@ namespace BugShan
 
 		/**
 		 * The assignment operator overload.
+		 * @param other: the l-value reference.
 		 */
-		inline RefPtr& operator = (const RefPtr&);
-
+		inline RefPtr& operator = (const RefPtr& other);
 		/**
-		 * Pass the multi template arguments to the constructor of type(T) directly.
-		 * @return: new RefPtr.
+		 * The assignment operator overload.
+		 * @param other: the r-value reference.
 		 */
-		template<typename... Args>
-		inline static RefPtr<T, RefTy> Create(Args...);
+		inline RefPtr& operator = (RefPtr&& other);
 
 	public:
 		/**
@@ -85,10 +91,26 @@ namespace BugShan
 	};//class RefPtr
 
 	template<typename T, typename RefTy>
-	inline RefPtr<T, RefTy>::RefPtr(void)
+	inline RefPtr<T, RefTy> RefPtr<T, RefTy>::NullPtr(void)
+	{
+		const unsigned size = sizeof(RefPtr<T, RefTy>);
+		unsigned char block[size];
+		memset(block, 0, sizeof(block));
+		return *((RefPtr<T, RefTy>*)block);
+	}
+
+	template<typename T, typename RefTy>
+	template<typename... Args>
+	inline RefPtr<T, RefTy>::RefPtr(Args... args)
 		: mpData(nullptr)
 		, mpRefCount(nullptr)
-	{ ; }
+	{
+		void* address = malloc(sizeof(T) + sizeof(*(this->mpRefCount)));
+		this->mpData = (T*)(address);
+		new(this->mpData) T(args...);
+		this->mpRefCount = (RefTy*)((char*)address + sizeof(*(this->mpRefCount)));
+		new(this->mpRefCount) RefTy(1);
+	}
 	template<typename T, typename RefTy>
 	inline RefPtr<T, RefTy>::RefPtr(const RefPtr<T, RefTy>& other)
 		: mpData(other.mpData)
@@ -108,25 +130,20 @@ namespace BugShan
 	{
 		if(mpData)
 		{
-			DecreaseRefCount();
-			if(*mpRefCount <= 0) this->FreeData();
+			this->DecreaseRefCount();
+			if(GetRefCount() <= 0) this->FreeData();
 		}
-		mpData		= other.mpData;
-		mpRefCount	= other.mpRefCount;
-		IncreaseRefCount();
+		this->mpData		= other.mpData;
+		this->mpRefCount	= other.mpRefCount;
+		this->IncreaseRefCount();
 		return *this;
 	}
 	template<typename T, typename RefTy>
-	template<typename... Args>
-	inline RefPtr<T, RefTy> RefPtr<T, RefTy>::Create(Args... args)
+	inline RefPtr<T, RefTy>& RefPtr<T, RefTy>::operator = (RefPtr&& other)
 	{
-		RefPtr<T, RefTy> ret;
-		void* address = malloc(sizeof(T) + sizeof(*(ret.mpRefCount)));
-		ret.mpData = (T*)(address);
-		new(ret.mpData) T(args...);
-		ret.mpRefCount = (uint*)((char*)address + sizeof(*(ret.mpRefCount)));
-		new(ret.mpRefCount) RefTy(1);
-		return ret;
+		std::swap(this->mpData,		other.mpData);
+		std::swap(this->mpRefCount,	other.mpRefCount);
+		return *this;
 	}
 
 	template<typename T, typename RefTy>
@@ -145,10 +162,11 @@ namespace BugShan
 	template<typename CastTy, typename /*= typename std::enable_if<std::is_base_of<T, CastTy>::value || std::is_base_of<CastTy, T>::value>::type*/>
 	inline RefPtr<CastTy> RefPtr<T, RefTy>::CastPtr(void)
 	{
-		RefPtr<CastTy> ret;
+		RefPtr<CastTy, RefTy> ret = RefPtr<CastTy, RefTy>::NullPtr();
 		ret.mpData		= static_cast<CastTy*>(this->mpData);
 		ret.mpRefCount	= this->mpRefCount;
 		IncreaseRefCount();
+		return ret;
 	}
 
 	template<typename T, typename RefTy>
