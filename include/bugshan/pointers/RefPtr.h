@@ -18,6 +18,10 @@ namespace BugShan
 		 * Point to null.
 		 */
 		static RefPtr NullPtr(void);
+		/**
+		 * Create RefPtr from a original pointer and take the ownership.
+		 */
+		static RefPtr Own(const T* const ptr);
 	public:
 		/**
 		 * Pass the multi template arguments to the constructor of type(T) directly.
@@ -91,13 +95,25 @@ namespace BugShan
 	};//class RefPtr
 
 	template<typename T, typename RefTy>
-	inline RefPtr<T, RefTy> RefPtr<T, RefTy>::NullPtr(void)
+	inline /*static*/ RefPtr<T, RefTy> RefPtr<T, RefTy>::NullPtr(void)
 	{
 		const unsigned size = sizeof(RefPtr<T, RefTy>);
 		unsigned char block[size];
 		memset(block, 0, sizeof(block));
 		return *((RefPtr<T, RefTy>*)block);
 	}
+	template<typename T, typename RefTy>
+	inline /*static*/ RefPtr<T, RefTy> RefPtr<T, RefTy>::Own(const T* const ptr)
+	{
+		RefPtr<T, RefTy> ret = RefPtr::NullPtr();
+
+		void* address = realloc((void*)ptr, sizeof(T) + sizeof(RefTy));
+		ret.mpData = (T*)address;
+		ret.mpRefCount = (RefTy*)((char*)address + sizeof(T));
+		new(ret.mpRefCount) RefTy(1);
+		return ret;
+	}
+
 
 	template<typename T, typename RefTy>
 	template<typename... Args>
@@ -105,12 +121,13 @@ namespace BugShan
 		: mpData(nullptr)
 		, mpRefCount(nullptr)
 	{
-		void* address = malloc(sizeof(T) + sizeof(*(this->mpRefCount)));
+		void* address = malloc(sizeof(T) + sizeof(RefTy));
 		this->mpData = (T*)(address);
 		new(this->mpData) T(args...);
-		this->mpRefCount = (RefTy*)((char*)address + sizeof(*(this->mpRefCount)));
+		this->mpRefCount = (RefTy*)((char*)address + sizeof(T));
 		new(this->mpRefCount) RefTy(1);
 	}
+
 	template<typename T, typename RefTy>
 	inline RefPtr<T, RefTy>::RefPtr(const RefPtr<T, RefTy>& other)
 		: mpData(other.mpData)
@@ -118,6 +135,7 @@ namespace BugShan
 	{
 		IncreaseRefCount();
 	}
+	
 	template<typename T, typename RefTy>
 	inline RefPtr<T, RefTy>::~RefPtr(void)
 	{
@@ -125,6 +143,7 @@ namespace BugShan
 		DecreaseRefCount();
 		if(*mpRefCount <= 0) this->FreeData();
 	}
+
 	template<typename T, typename RefTy>
 	inline RefPtr<T, RefTy>& RefPtr<T, RefTy>::operator = (const RefPtr& other)
 	{
@@ -198,12 +217,14 @@ namespace BugShan
 	template<typename T, typename RefTy>
 	inline void RefPtr<T, RefTy>::IncreaseRefCount(void)
 	{
-		(*mpRefCount) ++;
+		if(mpRefCount)
+			(*mpRefCount) ++;
 	}
 	template<typename T, typename RefTy>
 	inline void RefPtr<T, RefTy>::DecreaseRefCount(void)
 	{
-		(*mpRefCount) --;
+		if(mpRefCount)
+			(*mpRefCount) --;
 	}
 	template<typename T, typename RefTy>
 	inline void RefPtr<T, RefTy>::FreeData(void)
