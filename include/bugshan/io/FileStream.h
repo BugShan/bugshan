@@ -2,6 +2,7 @@
 #define	_BUGSHAN_IO_FILESTREAM_H_
 
 #include <bugshan/TypeDef.h>
+#include <string>
 #include <stdio.h>
 
 namespace BugShan
@@ -15,7 +16,7 @@ namespace BugShan
 			  * The constructor.
 			  * @param filePath: the full path of this file
 			  */
-			 FileStream(const char* const filePath);
+			 FileStream(const std::string& path);
 			/**
 			 * The destructor.
 			 */

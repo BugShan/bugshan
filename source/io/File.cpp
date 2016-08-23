@@ -10,7 +10,40 @@ namespace BugShan
 {
 	namespace IO
 	{
-		File::File(const char* const path)
+		/*static*/const bool File::Exist(const std::string& path)
+		{
+			struct stat fileStat;
+			return stat(path.c_str(), &fileStat);
+		}
+		/*static*/void File::Create(const std::string& path)
+		{
+			FILE* file = fopen(path.c_str(), "wb");
+			fclose(file);
+		}
+		/*static*/void File::Delete(const std::string& path)
+		{
+			remove(path.c_str());
+		}
+		/*static*/void File::Copy(const std::string& from, const std::string& to)
+		{
+			FileStream reader(from);
+			FileStream writer(to);
+			const unsigned int size = 1024;
+			unsigned char buffer[size];
+			while(!reader.IsEOF())
+			{
+				int bytes = reader.Read(buffer, size);
+				writer.Write(buffer, bytes);
+			}
+			reader.Close();
+			writer.Close();
+		}
+		/*static*/void File::Move(const std::string& from, const std::string& to)
+		{
+			rename(from.c_str(), to.c_str());
+		}
+
+		File::File(const std::string& path)
 			: mFullPathStr(path)
 			, mFileNameStr(Path::GetFileNameStr(mFullPathStr))
 		{
@@ -40,35 +73,6 @@ namespace BugShan
 			struct stat fileStat;
 			stat(mFullPathStr.c_str(), &fileStat);
 			return fileStat.st_size;
-		}
-
-		void File::Create(const char* const path)
-		{
-			FILE* file = fopen(path, "wb");
-			fclose(file);
-		}
-		void File::Delete(const char* const path)
-		{
-			remove(path);
-		}
-		void File::Copy(const char* const from, const char* const to)
-		{
-			FileStream reader(from);
-			FileStream writer(to);
-			const unsigned int size = 1024;
-			unsigned char buffer[size];
-			while(!reader.IsEOF())
-			{
-				int bytes = reader.Read(buffer, size);
-				writer.Write(buffer, bytes);
-			}
-			reader.Close();
-			writer.Close();
-		}
-
-		void File::Move(const char* const from, const char* const to)
-		{
-			rename(from, to);
 		}
 	};//namespace IO
 };//namespace BugShan

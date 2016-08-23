@@ -4,8 +4,8 @@ namespace BugShan
 {
 	namespace IO
 	{
-		FileStream::FileStream(const char* const filePath)
-			: mpFile(fopen(filePath, "wb"))
+		FileStream::FileStream(const std::string& path)
+			: mpFile(fopen(path.c_str(), "wb"))
 		{ ; }
 		FileStream::~FileStream(void)
 		{
