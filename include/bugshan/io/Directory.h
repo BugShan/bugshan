@@ -12,14 +12,42 @@ namespace BugShan
 		class Directory final
 		{
 		public:
+			/**
+			 * Check if the directory exist or not.
+			 */
+			static const bool Exist(const std::string& path);
+			/**
+			 * Create a specified directory.
+			 * @param path: the path of the directory to create
+			 */
+			static void Create(const std::string& path);
+			/**
+			 * Delete a specified directory.
+			 * @param path: the path of the directory to delete.
+			 */
+			static void Delete(const std::string& path);
+			/**
+			 * Copy the directory to another path.
+			 * @param from: the src path of the directory copied from
+			 * @param to:   the dest path of the directory copied to
+			 */
+			static void Copy(const std::string& from, const std::string& to);
+			/**
+			 * Move the directory to another path.
+			 * @param from: the src path of the directory copied from
+			 * @param to:   the dest path of the directory copied to
+			 */
+			static void Move(const std::string& from, const std::string& to);
+
+		public:
 			 /**
 			  * The constructor.
-			  * @param path: the full path of this File
+			  * @param path: the full path of this directory
 			  */
-			 Directory(const char* const path);
+			 Directory(const std::string& path);
 			 /**
 			  * The copy constructor.
-			  * @param other: the other file
+			  * @param other: the other directory
 			  */
 			 Directory(const Directory& other);
 			 /**
@@ -33,14 +61,15 @@ namespace BugShan
 			 */
 			inline const bool operator ==(const Directory& other) const;
 			inline const bool operator !=(const Directory& other) const;
+			inline operator const bool(void) const;
 
 		public:
 			/**
-			 * Get the name of this file.
+			 * Get the name of this directory.
 			 */
 			inline const std::string& GetName(void) const;
 			/**
-			 * Get the full path of this file.
+			 * Get the full path of this directory.
 			 */
 			inline const std::string& GetFullPath(void) const;
 
@@ -61,7 +90,7 @@ namespace BugShan
 		private:
 			/**
 			 * The assignment operator overload.
-			 * @param other: the other file
+			 * @param other: the other directory
 			 */
 			Directory& operator=(const Directory& other)		= delete;
 
@@ -78,6 +107,8 @@ namespace BugShan
 		{
 			return this->mFullPathStr != other.mFullPathStr;
 		}
+		inline Directory::operator const bool(void) const
+		{ return Directory::Exist(mFullPathStr.c_str()); }
 
 		inline const std::string& Directory::GetName(void) const
 		{

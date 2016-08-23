@@ -10,7 +10,28 @@ namespace BugShan
 {
 	namespace IO
 	{
-		Directory::Directory(const char* const path)
+		/*static*/const bool Directory::Exist(const std::string& path)
+		{
+			struct stat fileStat;
+			return stat(path.c_str(), &fileStat);
+		}
+		/*static*/void Directory::Create(const std::string& path)
+		{
+			::mkdir(path.c_str(), S_IRWXU | S_IRWXO);
+		}
+		/*static*/void Directory::Delete(const std::string& path)
+		{
+			::remove(path.c_str());
+		}
+		/*static*/void Directory::Copy(const std::string& from, const std::string& to)
+		{
+		}
+		/*static*/void Directory::Move(const std::string& from, const std::string& to)
+		{
+			rename(from.c_str(), to.c_str());
+		}
+
+		Directory::Directory(const std::string& path)
 			: mFullPathStr(path)
 			, mDirNameStr(Path::GetDirNameStr(path))
 		{ ; }
@@ -69,11 +90,11 @@ namespace BugShan
 			}
 			return ret;
 		}
-		 Directory Directory::GetParentDirectory(void) const
-		 {
-			std::string dirPath = Path::GetDirPathStr(mFullPathStr);
-			assert(!dirPath.empty());
-			return Directory(dirPath.c_str());
-		 }
+		Directory Directory::GetParentDirectory(void) const
+		{
+		   std::string dirPath = Path::GetDirPathStr(mFullPathStr);
+		   assert(!dirPath.empty());
+		   return Directory(dirPath.c_str());
+		}
 	};//namespace IO
 };//namespace BugShan
