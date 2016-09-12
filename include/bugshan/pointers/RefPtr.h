@@ -17,11 +17,11 @@ namespace BugShan
 		/**
 		 * Point to null.
 		 */
-		static RefPtr NullPtr(void);
+		static inline RefPtr NullPtr(void);
 		/**
 		 * Create RefPtr from a original pointer and take the ownership.
 		 */
-		static RefPtr Own(const T* const ptr);
+		static inline RefPtr Own(const T* const ptr);
 	public:
 		/**
 		 * Pass the multi template arguments to the constructor of type(T) directly.
@@ -77,13 +77,13 @@ namespace BugShan
 		 */
 		inline T& operator *  (void) const;
 		/**
-		 * The equality operation;
+		 * The equality operation.
 		 */
-		inline const bool operator == (const RefPtr) const;
+		inline const bool operator == (const RefPtr&) const;
 		/**
 		 * The inequality operation.
 		 */
-		inline const bool operator != (const RefPtr) const;
+		inline const bool operator != (const RefPtr&) const;
 
 	private:
 		inline void IncreaseRefCount(void);
@@ -204,12 +204,12 @@ namespace BugShan
 		return *(this->mpData);
 	}
 	template<typename T, typename RefTy>
-	inline const bool RefPtr<T, RefTy>::operator == (const RefPtr other) const
+	inline const bool RefPtr<T, RefTy>::operator == (const RefPtr& other) const
 	{
 		return this->mpData == other.mpData;
 	}
 	template<typename T, typename RefTy>
-	inline const bool RefPtr<T, RefTy>::operator != (const RefPtr other) const
+	inline const bool RefPtr<T, RefTy>::operator != (const RefPtr& other) const
 	{
 		return this->mpData != other.mpData;
 	}
